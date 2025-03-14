@@ -1,0 +1,176 @@
+body {
+
+    background: linear-gradient(to right, #a7c1dba4, #00416A),
+        url('/api/placeholder/1920/1080') center/cover;
+}
+
+.box {
+    height: 98.5vh;
+    width: 99vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    max-width: 450px;
+    padding: 20px;
+    box-sizing: border-box;
+    position: relative;
+    color: #fff;
+    animation: fadeIn 0.5s ease-out;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgb(153, 193, 241);
+    backdrop-filter: blur(10px);
+    justify-content: center;
+}
+
+span {
+    /* font-co: gray; */
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -1px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding-left: 30px;
+    color: #187fbe;
+}
+
+.title::before {
+    width: 18px;
+    height: 18px;
+}
+
+.title::after {
+    width: 18px;
+    height: 18px;
+    animation: pulse 1s linear infinite;
+}
+
+.title::before,
+.title::after {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    left: 0px;
+    background-color: #187fbe;
+}
+
+.message,
+.signin {
+    font-size: 14.5px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.signin {
+    text-align: center;
+}
+
+.signin a:hover {
+    text-decoration: underline royalblue;
+}
+
+.signin a {
+    color: #187fbe;
+}
+
+.flex {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+}
+
+.form label {
+    position: relative;
+}
+
+.form label .input {
+    color: gray;
+    width: 94.6%;
+    padding: 20px 05px 05px 10px;
+    outline: 0;
+    border: 1px solid rgba(105, 105, 105, 0.397);
+    border-radius: 10px;
+}
+
+::placeholder {
+    color: gray;
+}
+
+.inputsmall {
+    color: gray;
+    width: 90%;
+    padding: 20px 05px 05px 10px;
+    outline: 0;
+    border: 1px solid rgba(105, 105, 105, 0.397);
+    border-radius: 10px;
+}
+.form label .input,
+.form label .inputsmall {
+    width: 94.6%; /* or 90% for .inputsmall if you prefer */
+    padding: 20px 5px 5px 10px;
+    outline: 0;
+    border: 1px solid rgba(105, 105, 105, 0.397);
+    border-radius: 10px;
+    font-family: "Roboto", sans-serif; /* Choose a clean, modern font */
+    font-size: 16px;                  /* Increase font size for clarity */
+    color: #333;                      /* Dark text for readability */
+    background-color: #fff;           /* Subtle background for contrast */
+    transition: border-color 0.2s;    /* Smooth hover/focus transitions */
+}
+
+.form label .input:hover,
+.form label .inputsmall:hover {
+    border-color: #187fbe; /* Subtle highlight on hover */
+}
+
+.form label .input:focus,
+.form label .inputsmall:focus {
+    border-color: #187fbe; /* Highlight the input on focus */
+}
+
+
+.input {
+    font-size: medium;
+}
+
+.submit {
+    border: none;
+    outline: none;
+    padding: 10px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 16px;
+    transform: .3s ease;
+    background: linear-gradient(to right, #a7c1db, #187fbe);
+    transition-duration: 3.3s
+}
+
+.submit:hover {
+    background: linear-gradient(to left, #a7c1db, #187fbe);
+    transform: scale(1.05);
+    transform: 1s;
+}
+
+@keyframes pulse {
+    from {
+        transform: scale(0.9);
+        opacity: 1;
+    }
+
+    to {
+        transform: scale(1.8);
+        opacity: 0;
+    }
+}

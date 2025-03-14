@@ -1,0 +1,51 @@
+<!-- Main Container: Query Builder & Table View (Initially Hidden) -->
+<div class="container" id="selectContainer">
+  <!-- Query Builder -->
+  <div id="query-builder">
+    <div class="form-section">
+      <h3>Select Columns</h3>
+      <div id="splitcontainer">
+        <div id="checkbox-container"></div>
+        <div id="option-box">
+          <button class="btn-add" onclick="addAggregate()">
+            Add Aggregate Function
+          </button>
+
+          <button class="button1 btn-add" onclick="addCondition()">
+            Add Condition
+          </button>
+          <div class="order-by-wrapper">
+            <button
+              id="add-order"
+              class="button1 btn-add"
+              onclick="addOrderBy()"
+            >
+              Order By
+            </button>
+            <div id="order-list"></div>
+            <!-- Order selections appear here -->
+          </div>
+        </div>
+      </div>
+
+      <div id="splitcontainer2">
+        <div id="aggregate-container"></div>
+        <div id="conditions-container"></div>
+      </div>
+    </div>
+
+    <p id="message"></p>
+    <div class="btn-wrapper">
+      <button class="btn-execute" onclick="executeQuery()">
+        Execute Query
+      </button>
+    </div>
+
+    <div class="table-container">
+      <table id="data-table">
+        <thead id="table-header"></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>

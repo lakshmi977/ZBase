@@ -1,0 +1,44 @@
+<div class="section" id="tableSection">
+    <div id="tableCreationHeading">
+      <h2>
+        Create Table in <i class="fas fa-table"></i>
+        <span id="selectedDb"></span>
+      </h2>
+      <!-- <h2 id="cancelDBcreation" onclick="cancelTablecreation()">❌</h2> -->
+
+    </div>
+    <div class="input-group">
+      <input type="text" id="tableName" placeholder="Table name" />
+    </div>
+
+    <div id="columnInputs">
+      <div class="content" id="columnsArea">
+        <form id="tableForm">
+          <div class="form-group"></div>
+          <div class="column-header">
+            <h2>Table Columns</h2>
+          </div>
+        </form>
+      </div>
+    </div>
+
+
+    <div style="text-align: right; margin-top: 30px">
+      <button type="button" id="addColumnBtn" class="btn btn-gold" onclick="addColumn()">
+        Add Column
+      </button>
+      <button type="button" class="btn btn-gold" id="tableCreate" onclick="createTable()">
+        Create Table
+      </button>
+    </div>
+
+    <div class="tableDisplay">DB</div>
+    <div id="tableMessage" class="success-message"></div>
+  </div>
+</div>
+
+<style>
+#tableCreationHeading {
+  border: 1px solid greenyellow;
+}
+</style>

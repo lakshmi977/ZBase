@@ -1,0 +1,91 @@
+#deleteContainer {
+	margin: auto;
+	width: 90%;
+	background: rgba(255, 255, 255, 0.1);
+	backdrop-filter: blur(10px);
+	padding: 25px;
+	border-radius: 12px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	text-align: center;
+	color: white;
+}
+
+#deleteContainer input, #deleteContainer select {
+	width: 10%;
+	padding: 12px;
+	box-sizing: border-box;
+	margin: 10px 0;
+	border: none;
+	border-radius: 6px;
+	font-size: 16px;
+	outline: none;
+	background: rgba(255, 255, 255, 0.2);
+	color: white;
+	transition: 0.3s;
+}
+
+#deleteContainer input::placeholder {
+	color: rgba(255, 255, 255, 0.7);
+}
+
+#deleteContainer button {
+	width: 100%;
+	padding: 12px;
+	margin-top: 10px;
+	background: #ff9800;
+	border: none;
+	border-radius: 6px;
+	font-size: 16px;
+	font-weight: bold;
+	color: white;
+	cursor: pointer;
+	transition: 0.3s;
+}
+
+#deleteContainer button:hover {
+	background: #e68900;
+}
+
+#deleteContainer .conditions-container {
+	margin-top: 15px;
+}
+
+#deleteContainer .condition-group {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 10px;
+	background: rgba(255, 255, 255, 0.2);
+	padding: 10px;
+	border-radius: 8px;
+	color: white;
+}
+
+#deleteContainer .condition {
+	display: flex;
+	gap: 10px;
+}
+
+#deleteContainer .remove-btn {
+	background: red;
+	border: none;
+	padding: 1px;
+	cursor: pointer;
+	border-radius: 6px;
+	color: white;
+	font-size: 14px;
+	width: 5%;
+}
+
+#deleteContainer button {
+	width: 30%;
+	height: 45px;
+}
+
+#deleteContainer .logical-operator {
+	width: 20%;
+}
+
+#deleteContainer option {
+	background-color: var(--royal-cream);
+}

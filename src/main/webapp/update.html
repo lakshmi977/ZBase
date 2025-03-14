@@ -1,0 +1,56 @@
+<div class="updateContainer" id="updateContainer">
+    <div class="royal-header">
+        <h1>Update Query Builder</h1>
+    </div>
+
+    <div class="royal-form">
+        <div class="form-section">
+            <h3 class="section-title">Update Values</h3>
+            <div id="update-container">
+                <div class="update-pair">
+                    <select class="col-select update-column">
+                        <option value="">-- Select Column --</option>
+                    </select>
+                    <input type="text" class="value-input" placeholder="New Value">
+                    <button class="btn-remove" onclick="removeUpdatePair(this)">Remove</button>
+                </div>
+            </div>
+            <button class="btn-add" onclick="addUpdatePair()">Add Column</button>
+        </div>
+
+        <div class="form-section">
+            <h3 class="section-title">Where Conditions</h3>
+            <div class="warning-box">
+                <span class="royal-icon">⚠</span> Warning: Without conditions, all records will be updated. Please
+                specify conditions if you want to update specific records.
+            </div>
+            <div id="conditions-container">
+                <div class="condition">
+                    <select class="col-select condition-column">
+                        <option value="">-- Select Column --</option>
+                    </select>
+                    <select class="operator-select">
+                        <option value="="> = </option>
+                        <option value="!="> != </option>
+                        <option value=">"> > </option>
+                        <option value="<">
+                            < </option>
+                        <option value=">="> >=</option>
+                        <option value="<=">
+                            <= </option>
+                    </select>
+                    <input type="text" class="value-input" placeholder="Value">
+                    <button class="btn-remove" onclick="removeCondition(this)">Remove</button>
+                </div>
+            </div>
+            <div id="logical-operators-container"></div>
+            <button class="btn-add" onclick="addCondition()">Add Condition</button>
+        </div>
+
+
+
+        <div class="btn-wrapper">
+            <button class="btn-execute" onclick="executeQuery()">Execute Update</button>
+        </div>
+    </div>
+</div>
