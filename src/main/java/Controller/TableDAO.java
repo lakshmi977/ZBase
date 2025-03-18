@@ -13,6 +13,9 @@ import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.catalina.core.FrameworkListener;
+
 import javax.crypto.Cipher;
 import Model.*;
 
@@ -33,7 +36,7 @@ public class TableDAO<E> {
 	public TableDAO(User user, String dbName, String tableName) {
 		this.user = user;
 		this.tableName = tableName;
-		System.out.println("TABLE NAME:" + tableName + "   ColumnNAME  :" + dbName);
+		System.out.println("TABLE NAME:" + tableName + "   DBNAME  :" + dbName);
 		this.directory = user.getHomeDirectory() + "/" + dbName + "/";
 		this.columnsArray = readMetadata();
 		System.out.println("METADATA:" + columnsArray);
@@ -221,6 +224,8 @@ public class TableDAO<E> {
 			return Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Character.BYTES;
 		} else if (dataType.equalsIgnoreCase("STRING") && dataType != null) {
 			return Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Long.BYTES + Integer.BYTES;
+		} else if (dataType.equalsIgnoreCase("BLOB") && dataType != null) {
+			return Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Long.BYTES + Integer.BYTES;
 		}
 
 		return -1;
@@ -243,9 +248,9 @@ public class TableDAO<E> {
 
 	@SuppressWarnings("unchecked")
 	public boolean insertValue(HashMap<String, E> result) {
-		System.out.println("sdfghjklpoiuytrewqasdvbm,liuytrewqsdfghjkjhgfds");
+
 		if (!columnNameConstraintCheck(result)) {
-			System.out.println("checkinggggggggggggggggggg");
+
 			return false;
 		}
 
@@ -254,13 +259,11 @@ public class TableDAO<E> {
 			Object value = entry.getValue();
 			String datatype = null;
 
-			
-			
-			
-			
 //			System.out.println("Datatype  "+datatype);y
 
 			for (int i = 0; i < columnsArray.size(); i++) {
+				System.out.println("---------------------checking========================");
+
 				if (columnsArray.get(i).getName().equals(columnName)) {
 					if ("NONE".equals(value) || value == null) {
 						datatype = columnsArray.get(i).getDataType();
@@ -274,14 +277,32 @@ public class TableDAO<E> {
 						List<Constraint> listofConstraints = columnsArray.get(i).getConstraints();
 						for (Constraint constraint : listofConstraints) {
 
+							System.out.println(
+									"---------------------checking========================  " + constraint.getType());
+
 							if (constraint.getType() != null && constraint.getType().equals("DEF")) {
 
-								value = constraint.getDefault();
+								if (value.equals("NONE")) {
+									value = constraint.getDefault();
+								}
 
 							}
 							if (constraint.getType() != null && constraint.getType().equals("AUT")
-									&& value.equals("NONE")) {
-								value = getLastIntegerValue(columnName) + 1;
+									&& value.equals("NONE")
+									|| constraint.getType() != null && constraint.getType().equals("AUT")
+											&& value.equals("")) {
+
+//								value = getLastIntegerValue(columnName) + 1;
+								
+								List<E> listOfvalues=new ArrayList<>();
+								
+								listOfvalues=readColumnDataAsList(columnName, datatype);
+								
+								value=calculateMax(listOfvalues);
+								value=(Integer)value+1;
+								
+								System.out.println("yyyyyyyyyyyyyyyyyy   " +value);
+								
 
 							}
 
@@ -344,46 +365,60 @@ public class TableDAO<E> {
 			String columnName = entry.getKey();
 			Object value = entry.getValue();
 
-			System.out.println("=========== Checking column: " + columnName);
-
 			for (Column col : columnsArray) {
 				if (col.getName().trim().equalsIgnoreCase(columnName.trim())) {
 					column = col;
-					System.out.println("Column Found: " + col.getName());
+
 					break; // Stop searching after finding the column
 				}
 			}
-			// Print all available columns
 
 			if (column == null) {
-				System.out.println("Column " + columnName + " does not exist.");
 				listofColumns.put(columnName, false);
+				System.out.println("Check1");
 				break;
 			}
 
-			if (columnName.equals("BLOB")) {
+			if (column.getDataType().equals("BLOB")) {
 				isvalid = true;
 				listofColumns.put(columnName, isvalid);
 				break;
 			}
-			System.out.println("Available00000000000000000000000000000 Columns: " + column.getConstraints());
 
 			List<Constraint> listOfConstraint = column.getConstraints();
 
-			System.out.println("[[[[[[[[  " + listOfConstraint);
-
+			String constraint1 = "";
+			String constraint2 = "";
 			for (Constraint constraint : listOfConstraint) {
-				System.out.println(constraint.getType()
-						+ "----------000000000000000000000000000000-------------------------------------------------------------------------------------------------------");
-				if (constraint.getType() != null) {
+
+				if (constraint.getType().equals("PK")) {
+					constraint1 = "PK";
+				} else if (constraint.getType().equals("AUT")) {
+					constraint2 = "AUT";
+				}
+
+			}
+
+			if (constraint1.equals("PK") && constraint2.equals("AUT") && value.equals("NONE")
+					|| constraint1.equals("PK") && constraint2.equals("AUT") && value.equals("")
+					|| constraint2.equals("PK") && constraint1.equals("AUT") && value.equals("NONE")
+					|| constraint2.equals("PK") && constraint1.equals("AUT") && value.equals("")) {
+				isvalid = true;
+//				System.out.println("Check5");
+
+				listofColumns.put(columnName, isvalid);
+			} else {
+
+				for (Constraint constraint : listOfConstraint) {
+
 					if (constraint.getType().equals("DEF") && value.equals("NONE")) {
 
 						value = constraint.getType();
 
-						System.out.println("======values=======    " + value);
 					}
-
 					if (value != null) {
+						// Avoid NullPointerException
+
 						if (column.getDataType().equalsIgnoreCase("INT")
 								&& !(value instanceof Integer || value.equals("NONE"))
 								|| column.getDataType().equalsIgnoreCase("CHAR")
@@ -392,23 +427,22 @@ public class TableDAO<E> {
 										&& !(value instanceof Byte || value.equals("NONE"))
 								|| column.getDataType().equalsIgnoreCase("FLOAT") && !(value instanceof Double
 										|| value instanceof Integer || value.equals("NONE"))) {
-							
-							System.out.println("=========datatype ====================  " +column.getDataType() +"======== columname =========  "+columnName);;
-							
-							
-							System.out.println("Invalid data type for column " + columnName);
-							isvalid = false;
-							listofColumns.put(columnName, isvalid);
 
+							System.out.println(
+									"******* " + column.getDataType() + "  **** " + constraint.getType() + "*" + value);
+
+							isvalid = false;
+							System.out.println("Check2----------");
+							listofColumns.put(columnName, isvalid);
 						}
 					}
 
 					if ("NN".equalsIgnoreCase(constraint.getType())) {
-						System.out.println(
-								"not null=================================== violation " + constraint.getType());
 						if (value.equals("NONE")) {
 							System.out.println("not null violation");
 							isvalid = false;
+							System.out.println("Check3");
+
 							listofColumns.put(columnName, isvalid);
 
 						}
@@ -416,34 +450,40 @@ public class TableDAO<E> {
 					}
 					if ("PK".equalsIgnoreCase(constraint.getType())) {
 
-						System.out.println("type    " + primarykey.contains(value));
-						if (value == null) {
-							System.out.println("Primary key column " + columnName + " cannot have null values.");
+						if (value.equals("NONE")) {
 							isvalid = false;
-							listofColumns.put(columnName, isvalid);
+							System.out.println("Check4");
 
+							System.out.println(
+									"*************QQQQQQQQQQQQQQQQQQQQQQQQQQ*****************************************************");
+
+							listofColumns.put(columnName, isvalid);
+							break;
 						}
 
 						if (primarykey.contains(value)) {
-							System.out.println(
-									"Primary key column -------------------------------------- cannot have null values.");
 
-							System.out.println(
-									"Value " + value + " already exists in the primary key column " + columnName);
 							isvalid = false;
+							System.out.println("Check5");
+
 							listofColumns.put(columnName, isvalid);
 
 						}
 
-						System.out.println("value  " + value);
+						System.out.println("primary key   " + primarykey);
 						primarykey.add((E) value);
-
-						System.out.println("primary key------------     " + primarykey);
 
 					}
 
 					if ("UK".equalsIgnoreCase(constraint.getType())) {
+
+						System.out.println("  constraint  type =========>   " + constraint.getType());
+
+						System.out.println("Check6");
+
 						boolean exists = false;
+
+						System.out.println("Unique   keuysssssssss  => " + uniqueKeys);
 
 						for (List<E> valuesList : uniqueKeys.values()) {
 							if (valuesList.contains(value)) {
@@ -453,8 +493,8 @@ public class TableDAO<E> {
 						}
 
 						if (exists) {
-							System.out.println(
-									"Value " + value + " already exists in the unique key column " + columnName);
+							System.out.println("Check17");
+
 							isvalid = false;
 							listofColumns.put(columnName, isvalid);
 
@@ -463,10 +503,11 @@ public class TableDAO<E> {
 						uniqueKeys.computeIfAbsent(columnName, k -> new ArrayList<>()).add((E) value);
 
 					}
-
-					if ("FK".equalsIgnoreCase(constraint.getType())) {
+					if ("FK".equalsIgnoreCase(constraint.getType()) && value.equals("NONE")) {
 						System.out.println("------------   " + value);
+
 						listofColumns.put(columnName, true);
+						break;
 					}
 
 					if ("FK".equalsIgnoreCase(constraint.getType()) && value != null) {
@@ -485,13 +526,12 @@ public class TableDAO<E> {
 						}
 
 						boolean exists = false;
-						
-						
-						System.out.println(" Foreign keys -----------------  "+foreignKeys);
+
+						System.out.println(" Foreign keys -----------------  " + foreignKeys);
 
 						for (List<E> valuesList : foreignKeys.values()) {
 							if (valuesList.contains(value)) {
-								
+
 								exists = true;
 								break;
 							}
@@ -506,22 +546,21 @@ public class TableDAO<E> {
 								.add((E) value);
 
 					}
+
 				}
 			}
 		}
 
 		for (HashMap.Entry<String, Boolean> map : listofColumns.entrySet()) {
 			if (map.getValue().equals(false)) {
+
 				return false;
 			}
 
 		}
 
+//		System.out.println("check datatytpe   "+column.getDataType());
 		return true;
-	}
-
-	public void getCurrentOffset() {
-
 	}
 
 //	private Column findColumnByName(String columnName) {
@@ -535,19 +574,21 @@ public class TableDAO<E> {
 		ByteBuffer valueBuffer = null;
 		System.out.println("check1");
 
-		if ("BLOB".equals(datatype) ) {
+		if ("BLOB".equals(datatype)) {
 			try {
 				System.out.println("check2");
 				saveImage(columnName, value);
-				
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			return null;
 		}
-		if (value instanceof String  && datatype.equals("STRING")) {
-			String strValue = (String) value;
-			System.out.println("check5");
+
+		if (datatype.equals("STRING")) {
+			String strValue = String.valueOf(value); // Convert safely
+			System.out.println(
+					"check5=================================================================================================");
 
 			textAndImageMetadata(columnName, (E) strValue);
 			if (!strValue.equals("NONE")) {
@@ -559,9 +600,6 @@ public class TableDAO<E> {
 			return valueBuffer;
 
 		}
-
-
-		
 
 		if (value == null || "NONE".equals(value) && datatype.equals("STRING")) {
 			if ("STRING".equals(datatype)) {
@@ -580,7 +618,9 @@ public class TableDAO<E> {
 			return valueBuffer;
 		}
 
-		if (value instanceof String && ((String) value).isEmpty()) {
+		if (value instanceof String && ((String) value).isEmpty() && datatype.equals("STRING")) {
+
+			System.out.println("check6");
 			textAndImageMetadata(columnName, (E) "");
 			return null;
 		}
@@ -590,8 +630,7 @@ public class TableDAO<E> {
 		valueBuffer = ByteBuffer.allocate(INITIAL_CAPACITY);
 
 		if (datatype.equals("FLOAT")) {
-			if(value.equals("NONE"))
-			{
+			if (value.equals("NONE")) {
 				valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Double.BYTES);
 				valueBuffer.putLong(rowId);
 				valueBuffer.put((byte) (isDeleted ? 1 : 0));
@@ -605,66 +644,65 @@ public class TableDAO<E> {
 				valueBuffer.put((byte) 0);
 				valueBuffer.putDouble((Double) value);
 			}
-		}
-		else if(datatype.equals("INT"))
-		{
+		} else if (datatype.equals("INT")) {
 			System.out.println("check3");
-	     if(value.equals("NONE"))
-	     {
-	 		System.out.println("check2");
-	    	 valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Integer.BYTES);
+			if (value.equals("NONE")) {
+				System.out.println("check2");
+				valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Integer.BYTES);
 				valueBuffer.putLong(rowId);
 				valueBuffer.put((byte) (isDeleted ? 1 : 0));
 				valueBuffer.put((byte) 1);
 				valueBuffer.putInt(0);
-	     }
-	     else if (value instanceof Integer) {
-			valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Integer.BYTES);
-			valueBuffer.putLong(rowId);
-			valueBuffer.put((byte) (isDeleted ? 1 : 0));
-			valueBuffer.put((byte) 0);
-			valueBuffer.putInt((Integer) value);
-		} 
+			} else if (value instanceof Integer) {
+				valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Integer.BYTES);
+				valueBuffer.putLong(rowId);
+				valueBuffer.put((byte) (isDeleted ? 1 : 0));
+				valueBuffer.put((byte) 0);
+				valueBuffer.putInt((Integer) value);
+			} else if (value.equals("")) {
+				valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Integer.BYTES);
+				valueBuffer.putLong(rowId);
+				valueBuffer.put((byte) (isDeleted ? 1 : 0));
+				valueBuffer.put((byte) 0);
+				System.out.println(" valiues" + value + "naga");
+				valueBuffer.putInt((Integer) value);
+			}
 		}
-		if(datatype.equals("BYTE"))
-		{
-			
-			if(value.equals("NONE"))
-			{
+		if (datatype.equals("BYTE")) {
+
+			if (value.equals("NONE")) {
 				valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES);
 				valueBuffer.putLong(rowId);
 				valueBuffer.put((byte) (isDeleted ? 1 : 0));
 				valueBuffer.put((byte) 1);
-				valueBuffer.put((byte)0);
-	
+				valueBuffer.put((byte) 0);
+
 			}
-			
-		else if (value instanceof Byte) {
-			valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES);
-			valueBuffer.putLong(rowId);
-			valueBuffer.put((byte) (isDeleted ? 1 : 0));
-			valueBuffer.put((byte) 0);
-			valueBuffer.put((byte) value);
-		} 
+
+			else if (value instanceof Byte) {
+				valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES);
+				valueBuffer.putLong(rowId);
+				valueBuffer.put((byte) (isDeleted ? 1 : 0));
+				valueBuffer.put((byte) 0);
+				valueBuffer.put((byte) value);
+			}
 		}
-		if(datatype.equals("CHAR"))
-		{
-			if(value.equals("NONE"))
-			{
+		if (datatype.equals("CHAR")) {
+			if (value.equals("NONE")) {
 				valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Character.BYTES);
 				valueBuffer.putLong(rowId);
 				valueBuffer.put((byte) (isDeleted ? 1 : 0));
 				valueBuffer.put((byte) 1);
-				valueBuffer.putChar((char)0);
+				valueBuffer.putChar((char) 0);
 			}
-		
-		else if (value instanceof Character) {
-			valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Character.BYTES);
-			valueBuffer.putLong(rowId);
-			valueBuffer.put((byte) (isDeleted ? 1 : 0));
-			valueBuffer.put((byte) 0);
-			valueBuffer.putChar((char) value);
-		}
+
+			else if (value instanceof Character) {
+				valueBuffer = ByteBuffer.allocate(Long.BYTES + BOOLEAN_BYTES + BOOLEAN_BYTES + Character.BYTES);
+				valueBuffer.putLong(rowId);
+				valueBuffer.put((byte) (isDeleted ? 1 : 0));
+				valueBuffer.put((byte) 0);
+				valueBuffer.putChar((char) value);
+			}
 		}
 		valueBuffer.flip();
 		return valueBuffer;
@@ -861,7 +899,7 @@ public class TableDAO<E> {
 		if (value instanceof byte[]) {
 			dataToEncrypt = (byte[]) value;
 		} else if (value instanceof String) {
-			 dataToEncrypt = Base64.getDecoder().decode((String) value);
+			dataToEncrypt = Base64.getDecoder().decode((String) value);
 		} else {
 			throw new IllegalArgumentException("Unsupported data type: " + value.getClass().getSimpleName());
 		}
@@ -892,7 +930,7 @@ public class TableDAO<E> {
 
 		SecureRandom secureRandom = new SecureRandom();
 		byte[] iv = new byte[16];
-		secureRandom.nextBytes(iv); 
+		secureRandom.nextBytes(iv);
 
 		IvParameterSpec ivSpec = new IvParameterSpec(iv);
 		cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
@@ -956,63 +994,61 @@ public class TableDAO<E> {
 	}
 
 	public long getOffset(String column, Object data) {
-	    Path filePath = Paths.get(directory + tableName + "/" + column + "_metadata");
-	    
-	    int dataLength;
-	    
-	    if(data==null ||   data.equals("NONE"))
-	    {
-	    	dataLength=0;
-	    }
-	    
-	    else if (data instanceof byte[]) {
-	        dataLength = ((byte[]) data).length; // Get length of byte array
-	    } else if (data instanceof String) {
-	        dataLength = ((String) data).getBytes(StandardCharsets.UTF_8).length; // Convert to bytes for accurate size
-	    } else {
-	        throw new IllegalArgumentException("Unsupported data type: " + data.getClass().getSimpleName());
-	    }
+		Path filePath = Paths.get(directory + tableName + "/" + column + "_metadata");
 
-	    try (FileChannel channel = FileChannel.open(filePath,
-	            StandardOpenOption.READ,
-	            StandardOpenOption.WRITE,
-	            StandardOpenOption.CREATE)) {
+		int dataLength;
 
-	        // Check if header is initialized (expects at least 16 bytes)
-	        if (channel.size() < 16) {
-	            ByteBuffer initBuffer = ByteBuffer.allocate(8);
-	            channel.position(8);
-	            initBuffer.putLong(dataLength); // Store the new offset as dataLength
-	            initBuffer.flip();
-	            channel.write(initBuffer);
-	            return 0;
-	        }
+		if (data == null || data.equals("NONE")) {
+			dataLength = 0;
+		}
 
-	        // Read the current offset from the header (position 8 to 15)
-	        ByteBuffer readBuffer = ByteBuffer.allocate(8);
-	        channel.position(8);
-	        channel.read(readBuffer);
-	        readBuffer.flip();
-	        long currentOffset = readBuffer.getLong();
+		else if (data instanceof byte[]) {
+			dataLength = ((byte[]) data).length; // Get length of byte array
+		} else if (data instanceof String) {
+			dataLength = ((String) data).getBytes(StandardCharsets.UTF_8).length; // Convert to bytes for accurate size
+		} else {
+			throw new IllegalArgumentException("Unsupported data type: " + data.getClass().getSimpleName());
+		}
 
-	        // Calculate the new offset by adding the length of the new data.
-	        long newOffset = currentOffset + dataLength;
+		try (FileChannel channel = FileChannel.open(filePath, StandardOpenOption.READ, StandardOpenOption.WRITE,
+				StandardOpenOption.CREATE)) {
 
-	        // Write the updated offset back to position 8
-	        ByteBuffer offsetBuffer = ByteBuffer.allocate(8);
-	        offsetBuffer.putLong(newOffset);
-	        offsetBuffer.flip();
-	        channel.position(8);
-	        channel.write(offsetBuffer);
+			// Check if header is initialized (expects at least 16 bytes)
+			if (channel.size() < 16) {
+				ByteBuffer initBuffer = ByteBuffer.allocate(8);
+				channel.position(8);
+				initBuffer.putLong(dataLength); // Store the new offset as dataLength
+				initBuffer.flip();
+				channel.write(initBuffer);
+				return 0;
+			}
 
-	        // Return the original offset (where new data should be written)
-	        return currentOffset;
+			// Read the current offset from the header (position 8 to 15)
+			ByteBuffer readBuffer = ByteBuffer.allocate(8);
+			channel.position(8);
+			channel.read(readBuffer);
+			readBuffer.flip();
+			long currentOffset = readBuffer.getLong();
 
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
-	    return 0;
+			// Calculate the new offset by adding the length of the new data.
+			long newOffset = currentOffset + dataLength;
+
+			// Write the updated offset back to position 8
+			ByteBuffer offsetBuffer = ByteBuffer.allocate(8);
+			offsetBuffer.putLong(newOffset);
+			offsetBuffer.flip();
+			channel.position(8);
+			channel.write(offsetBuffer);
+
+			// Return the original offset (where new data should be written)
+			return currentOffset;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
+
 	public int[] getRowIdAndOffset(String columnFile, String data) {
 		Path filePath = Paths.get(directory + tableName + "/" + columnFile + "_metadata");
 
@@ -2252,13 +2288,17 @@ public class TableDAO<E> {
 		}
 
 		try (FileChannel channel = FileChannel.open(filePath, StandardOpenOption.READ)) {
+
+			System.out.println("FFFFFFFFFFFFFFFFile Path  " + filePath);
+
 			ByteBuffer countBuffer = ByteBuffer.allocate(Long.BYTES);
 			if (channel.read(countBuffer) < Long.BYTES)
 				return dataMap;
 
 			countBuffer.flip();
 			long rowCount = countBuffer.getLong();
-			System.out.println("Row count in column '" + columnName + "': " + rowCount);
+			System.out.println(
+					"Row count in colu00000000000000000000000000000000000mn '" + columnName + "': " + rowCount);
 
 			for (int i = 0; i < rowCount; i++) {
 				Object value = readDataValue(channel, datatype);
@@ -2286,7 +2326,7 @@ public class TableDAO<E> {
 		byte isDeleted = rowBuffer.get();
 		byte isNull = rowBuffer.get();
 		if (isDeleted == 1)
-	
+
 			return null;
 		return isNull == 1 ? "null" : readValue(rowBuffer, datatype);
 	}
@@ -2404,9 +2444,15 @@ public class TableDAO<E> {
 				FileChannel dataChannel = FileChannel.open(Paths.get(directory + tableName + "/" + dataFile),
 						StandardOpenOption.READ)) {
 
-			ByteBuffer countBuffer = ByteBuffer.allocate(Long.BYTES);
-			if (metaChannel.read(countBuffer) < 16)
+			System.out.println("PPPPPPPatrha   1  " + directory + tableName + "/" + metadataFile);
+
+			System.out.println("PPPPPPPatrha   2  " + directory + tableName + "/" + dataFile);
+
+			ByteBuffer countBuffer = ByteBuffer.allocate(16);
+			if (metaChannel.read(countBuffer) < 16) {
+				System.out.println("GHello");
 				return result;
+			}
 			countBuffer.flip();
 			long rowCount = countBuffer.getLong();
 			long headerOffset = countBuffer.getLong();
@@ -2471,6 +2517,54 @@ public class TableDAO<E> {
 	//////////////////////// Delete Methods
 
 	public boolean deletemethod(List<ConditionGroup> conditionGroups) {
+
+		if (conditionGroups == null || conditionGroups.isEmpty()) {
+			for (Column column : columnsArray) {
+				String filePath = directory + tableName + "/" + column.getName(); // File path
+				String metadataFilePath = directory + tableName + "/" + column.getName() + "_metadata"; // Metadata file
+																										// path
+
+				String datatype = "STRING"; // Assume we get this info from somewhere
+
+				try {
+					// Delete main file
+					deleteFile(filePath);
+
+					// If datatype is STRING, also delete metadata file
+					if ("STRING".equals(datatype)) {
+						deleteFile(metadataFilePath);
+					}
+				} catch (IOException e) {
+					System.err.println("Error deleting files for: " + column.getName());
+					e.printStackTrace();
+					return false;
+				}
+			}
+
+			// Recreate files
+			for (Column column : columnsArray) {
+				String filePath = directory + tableName + "/" + column.getName(); // File path
+				String metadataFilePath = directory + tableName + "/" + column.getName() + "_metadata"; // Metadata file
+																										// path
+
+				try {
+					// Create main file
+					createFile(filePath);
+
+					// If datatype is STRING, also create metadata file
+					if ("STRING".equals("STRING")) {
+						createFile(metadataFilePath);
+					}
+				} catch (IOException e) {
+					System.err.println("Error creating files for: " + column.getName());
+					e.printStackTrace();
+					return false;
+				}
+			}
+
+			return true;
+		}
+
 		List<List<Long>> listOfdeleteRowNumbers = new ArrayList<>();
 		List<String> logicalOperator = new ArrayList<>();
 
@@ -2505,12 +2599,34 @@ public class TableDAO<E> {
 		}
 		List<Long> finalRows = new ArrayList<>(finalResultSet);
 
-		deleteValues(finalRows);
-		return true;
+		System.out.println("------  List of Row ids  ---------- " + finalRows);
+
+		if (finalRows.isEmpty()) {
+			return false;
+		}
+
+		if (deleteValues(finalRows)) {
+			return true;
+		}
+		return false;
 
 	}
 
-	public void deleteValues(List<Long> listofRowid) {
+	private static void deleteFile(String path) throws IOException {
+		Path filePath = Paths.get(path);
+		if (Files.exists(filePath)) {
+			Files.delete(filePath);
+			System.out.println("Deleted: " + path);
+		}
+	}
+
+	private static void createFile(String path) throws IOException {
+		Path filePath = Paths.get(path);
+		Files.createFile(filePath);
+		System.out.println("Created: " + path);
+	}
+
+	public boolean deleteValues(List<Long> listofRowid) {
 		for (Column column : columnsArray) {
 			String datatype = column.getDataType();
 			String columnName = column.getName();
@@ -2519,19 +2635,24 @@ public class TableDAO<E> {
 
 			Path path = Paths.get(directory + tableName + "/" + columnName);
 
-			if (datatype.equals("STRING")) {
+			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+
+			if (datatype.equals("STRING") || datatype.equals("BLOB")) {
+
+				System.out.println("%%%%%%%%%%$$$$$$$$$$$$$$$$$$$$$$%%%%%%%%%%%%%%%%%%%%%%%%%%  " + datatype);
+
 				path = Paths.get(path + "_metadata");
 			}
 
 			try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE)) {
 
-				if (datatype.equals("STRING")) {
+				if (datatype.equals("STRING") || datatype.equals("BLOB")) {
 					ByteBuffer headerBuffer = ByteBuffer.allocate(16);
 					int bytesRead = channel.read(headerBuffer);
 
 					if (bytesRead != 16) {
 
-						return;
+						return false;
 					}
 					headerBuffer.flip();
 					long rowCount = headerBuffer.getLong();
@@ -2543,7 +2664,7 @@ public class TableDAO<E> {
 
 					if (bytesRead != 8) {
 
-						return;
+						return false;
 					}
 					headerBuffer.flip();
 					long rowCount = headerBuffer.getLong();
@@ -2563,9 +2684,10 @@ public class TableDAO<E> {
 						position = ((rowid - 1) * 11) + 16;
 					} else if (datatype.equals("CHAR")) {
 						position = ((rowid - 1) * 12) + 16;
-					} else if (datatype.equals("STRING")) {
+					} else if (datatype.equals("STRING") || datatype.equals("BLOB")) {
 						position = ((rowid - 1) * 22) + 16 + 8;
 					}
+//					
 
 					if (position < 1) {
 						position = 0;
@@ -2584,6 +2706,7 @@ public class TableDAO<E> {
 				e.printStackTrace();
 			}
 		}
+		return true;
 	}
 
 /////////////////// select methods
@@ -2597,24 +2720,25 @@ public class TableDAO<E> {
 		if (listofcolumns == null && columnFunctionMap == null && conditiongroups == null && orderby == null) {
 			return viewData();
 		} else if (listofcolumns != null && columnFunctionMap == null && conditiongroups == null && orderby == null) {
-			List<E> resulyEs=particularViewData(listofcolumns);
+			List<E> resulyEs = particularViewData(listofcolumns);
 			return resulyEs;
 		} else if (listofcolumns != null && conditiongroups != null && columnFunctionMap == null && orderby == null) {
-			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			
-			
-			
-		
+			System.out.println("***********************************************************************************************************************************************************");
 			return (List<E>) getRecordsWithCondition(listofcolumns, conditiongroups);
-			
-		} else if (listofcolumns != null && columnFunctionMap != null && conditiongroups == null && orderby == null) {
+		} else if (listofcolumns != null && columnFunctionMap != null && conditiongroups == null
+				&& (orderby == null || orderby != null)) {
+
+		
 			return applyAggregateFunctions(listofcolumns, columnFunctionMap);
-		} else if (listofcolumns != null && columnFunctionMap != null && conditiongroups != null && orderby == null) {
+		} else if (listofcolumns != null && columnFunctionMap != null && conditiongroups != null
+				&& (orderby == null || orderby != null)) {
 			return applyAggregateFunctionsWithWhereCondition(listofcolumns, columnFunctionMap, conditiongroups);
 
 		} else if (listofcolumns != null && columnFunctionMap == null && conditiongroups != null && orderby != null) {
 			return getRecordsusingOrderByWithWhereCondition(listofcolumns, conditiongroups, orderby);
 		} else if (listofcolumns != null && columnFunctionMap == null && conditiongroups == null && orderby != null) {
+
 			return getRecordsusingOrderBy(listofcolumns, orderby);
 		}
 
@@ -2664,16 +2788,14 @@ public class TableDAO<E> {
 
 			if (datatype.equals("STRING")) {
 				listOfColumnsViewData.add((E) readingStringFile(specificColumn + "_metadata", specificColumn));
-			}
-			 else if (datatype.equals("BLOB")) {
-					try {
-						listOfColumnsViewData.add((E) getImage(specificColumn + "_metadata", specificColumn));
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				} 
-			else {
+			} else if (datatype.equals("BLOB")) {
+				try {
+					listOfColumnsViewData.add((E) getImage(specificColumn + "_metadata", specificColumn));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else {
 				listOfColumnsViewData.add((E) readColumnDataAsList(specificColumn, datatype));
 			}
 		}
@@ -2743,6 +2865,7 @@ public class TableDAO<E> {
 				}
 			}
 		}
+		System.out.println("RRRRRRRRRREEEEEEEEEESSSSSSSSSLLLLLLTTTTTTTTT   0000000000000000000000000000000000000000000000000000000000000000000"+result);
 		return result;
 	}
 
@@ -2844,33 +2967,38 @@ public class TableDAO<E> {
 		System.out.println("-------->values of the esult " + values);
 		return (HashMap<Long, E>) values;
 	}
-
+	
+	
 	public List<Object> getValues(List<Long> listofRowid, String columnName, String datatype) {
 		List<Object> values = new ArrayList<>();
 		Path path = Paths.get(directory + tableName + "/" + columnName);
-		Path path1 = Paths.get(directory + tableName + "/" + columnName);
-		long offset = 0;
 
-		if (datatype.equals("STRING")) {
-			path = Paths.get(path + "_metadata");
+		if (datatype.equals("STRING") || datatype.equals("BLOB")) {
+			path = Paths.get(directory + tableName + "/" + columnName + "_metadata");
 		}
-
-		System.out.println(" paths   ----------------->" + path + "List of row id  " + listofRowid);
-
+     
+		System.out.println("getValues");
 		try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ)) {
 
-			ByteBuffer headerBuffer = ByteBuffer.allocate(8);
-			int bytesRead = channel.read(headerBuffer);
-			if (bytesRead != 8) {
-				System.out.println("Failed to read the complete header.");
-				return values;
+			if (datatype.equals("STRING")) {
+				ByteBuffer headerBuffer = ByteBuffer.allocate(16);
+				int bytesRead = channel.read(headerBuffer);
+				if (bytesRead != 16) {
+					return values;
+				}
+				headerBuffer.flip();
+				long rowCount = headerBuffer.getLong();
+			} else {
+				// Read header: first 8 bytes (row count)
+				ByteBuffer headerBuffer = ByteBuffer.allocate(8);
+				int bytesRead = channel.read(headerBuffer);
+				if (bytesRead != 8) {
+					return values;
+				}
+				headerBuffer.flip();
+				long rowCount = headerBuffer.getLong();
 			}
-			headerBuffer.flip();
-			long rowCount = headerBuffer.getLong();
-			System.out.println("Row count: " + rowCount);
-
 			for (Long rowid : listofRowid) {
-
 				long position = 0;
 
 				if (datatype.equals("INT")) {
@@ -2882,6 +3010,8 @@ public class TableDAO<E> {
 				} else if (datatype.equals("CHAR")) {
 					position = ((rowid - 1) * 12) + 10 + 8;
 				} else if (datatype.equals("STRING")) {
+					position = ((rowid - 2) * 22) + 18 + 8;
+				} else if (datatype.equals("BLOB")) {
 					position = ((rowid - 2) * 22) + 18 + 8;
 				}
 
@@ -2896,13 +3026,8 @@ public class TableDAO<E> {
 				readBuffer.flip();
 
 				if (datatype.equals("INT")) {
-
 					values.add(readBuffer.getInt());
-					//     System.out.println("-------->check1"+ (readBuffer.getInt()));
-
 				} else if (datatype.equals("FLOAT")) {
-
-					readBuffer.flip();
 					values.add(readBuffer.getDouble());
 				} else if (datatype.equals("BYTE")) {
 					values.add(readBuffer.get());
@@ -2912,35 +3037,117 @@ public class TableDAO<E> {
 					ByteBuffer metaBuffer = ByteBuffer.allocate(12);
 					channel.read(metaBuffer);
 					metaBuffer.flip();
-					int length = 0;
-					if (rowid == 1) {
-						offset = 0;
-						length = getOffsetforSelect(columnName, rowid);
-					} else {
-						offset = metaBuffer.getLong();
-						length = metaBuffer.getInt();
-					}
-
-					System.out.println("---------offset Check ======= " + offset);
-
-					System.out.println("---------Length ======= " + length);
+					long offset = metaBuffer.getLong();
+					int length = metaBuffer.getInt();
 
 					ByteBuffer stringBuffer = ByteBuffer.allocate(length);
-					Path metadataPath = Paths.get(directory + tableName + "/" + columnName + "_metadata");
-					try (FileChannel metaChannel = FileChannel.open(path1, StandardOpenOption.READ)) {
+					Path metadataPath = Paths.get(directory + tableName + "/" + columnName);
+					try (FileChannel metaChannel = FileChannel.open(metadataPath, StandardOpenOption.READ)) {
 						metaChannel.position(offset);
 						metaChannel.read(stringBuffer);
 						stringBuffer.flip();
-						values.add(StandardCharsets.UTF_8.decode(stringBuffer).toString());
+						
+						System.out.println("Offfffffsettttttttttttttt  "+offset);
+//						System.out.println("getValues ------    > "+(StandardCharsets.UTF_8.decode(stringBuffer).toString()));
+						
+						String value=StandardCharsets.UTF_8.decode(stringBuffer).toString();
+						values.add(value);
+						
+						System.out.println("value  "+value);
+						
+						System.out.println("pppppppppppppppppppppp  "+values);
+					
+					}
+				} else if (datatype.equals("BLOB")) {
+					ByteBuffer metaBuffer = ByteBuffer.allocate(12);
+					channel.read(metaBuffer);
+					metaBuffer.flip();
+					long rowRelativeOffset = metaBuffer.getLong(); // Extract BLOB position
+					int length = metaBuffer.getInt();
+
+					// Call getImage() to get the BLOB data
+					List<String> images = null;
+					try {
+						images = getImage(columnName + "_metadata", columnName);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					if (rowid <= images.size()) {
+						values.add(images.get(rowid.intValue() - 1));
+					} else {
+						values.add(null);
 					}
 				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		System.out.println("-------->values of the esult " + values);
+		System.out.println("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN  "+values);
 		return values;
+	}
+	
+	
+	public String getImageWithID(String metadataFile, String dataFile, long position) throws Exception {
+		String result = "";
+
+		try (FileChannel metaChannel = FileChannel.open(Paths.get(directory + tableName + "/" + metadataFile),
+				StandardOpenOption.READ);
+				FileChannel dataChannel = FileChannel.open(Paths.get(directory + tableName + "/" + dataFile),
+						StandardOpenOption.READ)) {
+
+			// Read header: first 16 bytes (8 for rowCount, 8 for headerOffset)
+			ByteBuffer headerBuffer = ByteBuffer.allocate(16);
+			if (metaChannel.read(headerBuffer, 0) < 16) {
+				System.out.println("Metadata file is empty!");
+				return result;
+			}
+			headerBuffer.flip();
+			long rowCount = headerBuffer.getLong();
+			long headerOffset = headerBuffer.getLong();
+
+			System.out.println("Row count: " + rowCount);
+			System.out.println("Header offset: " + headerOffset);
+
+			int recordSize = getRowSize("BLOB");
+			if (recordSize <= 0) {
+				System.out.println("Invalid record size!");
+				return result;
+			}
+
+			// Read the length of the image at the given position
+			dataChannel.position(position);
+			ByteBuffer lengthBuffer = ByteBuffer.allocate(4); // Assuming image size is stored as an int (4 bytes)
+			if (dataChannel.read(lengthBuffer) < 4) {
+				System.out.println("Could not read image length!");
+				return result;
+			}
+			lengthBuffer.flip();
+			int imageLength = lengthBuffer.getInt();
+
+			if (imageLength <= 0) {
+				System.out.println("Invalid image length: " + imageLength);
+				return result;
+			}
+
+			// Read the actual image data
+			ByteBuffer dataBuffer = ByteBuffer.allocate(imageLength);
+			if (dataChannel.read(dataBuffer) < imageLength) {
+				System.out.println("Incomplete image data read!");
+				return result;
+			}
+
+			dataBuffer.flip();
+			byte[] rawData = dataBuffer.array();
+
+			// Decrypt the image and encode it as Base64
+			byte[] decryptedData = decryptData(rawData, SECRET_KEY);
+			result = Base64.getEncoder().encodeToString(decryptedData);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return result;
 	}
 
 	/// aggerate fumction selecting
@@ -3007,27 +3214,43 @@ public class TableDAO<E> {
 				for (String functionName : functionNames) { // Iterate over multiple functions
 					switch (functionName.toUpperCase()) {
 					case "COUNT":
-						result.add((E) Long.valueOf(finalRowList.size())); // Corrected to count filtered rows
+						String countColumn = datatype.equals("STRING") ? columnName + "_metadata" : columnName;
+						List<E> result1 = new ArrayList<>();
+
+						System.out.println("RRRRRRRRRRowcount " + values.size());
+
+						result1.add((E) (values.size() + ""));
+						result.add((E) result1); // Cast Long to E safely
 						break;
 
 					case "SUM":
 						if (isNumericType(datatype)) {
-							result.add((E) calculateSum(values, datatype));
+							List<E> result2 = new ArrayList<>();
+							result2.add((E) calculateSum(values, datatype));
+
+							result.add((E) result2);
 						}
 						break;
 
 					case "AVG":
 						if (isNumericType(datatype)) {
-							result.add((E) calculateAverage(values, datatype));
+							List<E> result3 = new ArrayList<>();
+							result3.add((E) calculateAverage(values, datatype));
+							result.add((E) result3);
 						}
 						break;
 
 					case "MAX":
-						result.add(calculateMax(values));
+						List<E> result3 = new ArrayList<>();
+						result3.add(calculateMax(values));
+						result.add((E) result3);
 						break;
 
 					case "MIN":
-						result.add(calculateMin(values));
+						List<E> result4 = new ArrayList<>();
+						result4.add(calculateMin(values));
+
+						result.add((E) result4);
 						break;
 
 					default:
@@ -3039,7 +3262,7 @@ public class TableDAO<E> {
 
 		if (!listOfColumns.containsAll(aggregateColumns)) {
 			System.out.println("Not all aggregate columns are present in listOfColumns.");
-			return null; // Return null if any column is missing
+			return null; 
 		}
 
 		return result;
@@ -3077,30 +3300,46 @@ public class TableDAO<E> {
 
 				// Apply aggregate functions
 				for (String functionName : functions) {
+
 					switch (functionName.toUpperCase()) {
 					case "COUNT":
 						String countColumn = datatype.equals("STRING") ? columnName + "_metadata" : columnName;
-						result.add((E) Long.valueOf(getRowCount(countColumn))); // Cast Long to E safely
+						List<E> result1 = new ArrayList<>();
+
+						System.out.println("RRRRRRRRRRowcount " + values.size());
+
+						result1.add((E) (values.size() + ""));
+						result.add((E) result1); // Cast Long to E safely
 						break;
 
 					case "SUM":
 						if (isNumericType(datatype)) {
-							result.add((E) calculateSum(values, datatype));
+							List<E> result2 = new ArrayList<>();
+							result2.add((E) calculateSum(values, datatype));
+
+							result.add((E) result2);
 						}
 						break;
 
 					case "AVG":
 						if (isNumericType(datatype)) {
-							result.add((E) calculateAverage(values, datatype));
+							List<E> result3 = new ArrayList<>();
+							result3.add((E) calculateAverage(values, datatype));
+							result.add((E) result3);
 						}
 						break;
 
 					case "MAX":
-						result.add(calculateMax(values));
+						List<E> result3 = new ArrayList<>();
+						result3.add(calculateMax(values));
+						result.add((E) result3);
 						break;
 
 					case "MIN":
-						result.add(calculateMin(values));
+						List<E> result4 = new ArrayList<>();
+						result4.add(calculateMin(values));
+
+						result.add((E) result4);
 						break;
 
 					default:
@@ -3109,10 +3348,17 @@ public class TableDAO<E> {
 				}
 			}
 		}
-		if (!listOfColumns.containsAll(aggregateColumns)) {
+
+		System.out.println("----------------------------------------------------------------list of Columns   "
+				+ listOfColumns + "  aggreate columns " + aggregateColumns);
+		if (!aggregateColumns.containsAll(listOfColumns)) {
+
 			System.out.println("Not all aggregate columns are present in listOfColumns.");
 			return null; // Return null if any column is missing
 		}
+
+		System.out.println("AAAAAAAAAAAAAAAAggggggggreate function  " + result);
+
 		return result;
 
 	}
@@ -3251,6 +3497,9 @@ public class TableDAO<E> {
 	// selecting with orderBy
 
 	public List<E> getRecordsusingOrderBy(List<String> listOfColumns, OrderBy orderBy) {
+
+		System.out.println("#############################################################");
+
 		String columnName = null;
 		String datatype = null;
 		HashMap<Integer, Object> records = null;
@@ -3263,13 +3512,28 @@ public class TableDAO<E> {
 			}
 		}
 
+		System.out.println("KKKKKKKKKKKKKKKKKKKKKKKKKKK   " + datatype);
+
 		if (datatype.equals("STRING")) {
-			records = readingStringFileAsMap(columnName + "_metadata", columnName);
+
+			System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYY  " + datatype);
+			records = readingStringFileAsMap(orderBy.getColumnName() + "_metadata", columnName);
+
+			System.out.println("RRRRRRRRecrsds   " + records);
+
 		} else {
-			records = (HashMap<Integer, Object>) readingDatasAsMap(columnName, datatype);
+			System.out.println("   ddddddddddddddddd " + orderBy.getColumnName() + "     " + datatype);
+			records = (HashMap<Integer, Object>) readingDatasAsMap(orderBy.getColumnName(), datatype);
 		}
 		boolean isAscending = orderBy.getOrderDirection().equalsIgnoreCase("ASC");
-		Map<Integer, Object> sortedRecords = HashMapSorting.sortByValue(records, isAscending);
+		// Filter out null values before sorting
+		Map<Integer, Object> filteredRecords = records.entrySet().stream().filter(entry -> entry.getValue() != null) // Only
+																														// keep
+																														// non-null
+																														// values
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+		Map<Integer, Object> sortedRecords = HashMapSorting.sortByValue(filteredRecords, isAscending);
 
 		System.out.println("==================  sorted Records========= " + sortedRecords);
 		List<Long> listOfRowId = new ArrayList<>();
@@ -3372,9 +3636,7 @@ public class TableDAO<E> {
 		String pathString = directory + tableName;
 		File folder = new File(pathString);
 		String columnName = columnsArray.get(0).getName();
-		
 
-		
 		long rowCount = 0;
 
 		if (columnsArray.get(0).getDataType().equals("STRING") || columnsArray.get(0).getDataType().equals("BLOB")) {
@@ -3397,7 +3659,7 @@ public class TableDAO<E> {
 		if (column.getName().equals("Metadata") || column.getName().contains("metadata")) {
 			return false;
 		}
-		boolean autCheck=true;
+		boolean autCheck = true;
 		if (column.getConstraints() != null && !column.getConstraints().isEmpty()) {
 			for (Constraint cons : column.getConstraints()) {
 				if (cons.getType() != null) {
@@ -3414,14 +3676,13 @@ public class TableDAO<E> {
 							}
 						}
 					} else if (cons.getType().equals("AUT")) {
-						autCheck=false;
-						if (!column.getDataType().equals("INT") && !column.getDataType().equals("FLOAT"))  {
+						autCheck = false;
+						if (!column.getDataType().equals("INT") && !column.getDataType().equals("FLOAT")) {
 							return false;
-						}
-						else {
+						} else {
 							for (Constraint con : column.getConstraints()) {
-								if(con.getType().equals("PK") || con.getType().equals("UK")) {
-									autCheck=true;
+								if (con.getType().equals("PK") || con.getType().equals("UK")) {
+									autCheck = true;
 									break;
 								}
 							}
@@ -3434,7 +3695,8 @@ public class TableDAO<E> {
 						}
 						loop: for (String tabName : new Database(database.getDabaseName())
 								.getTables(user.getUsername())) {
-							List<Column> columnsCheck = new TableDAO(user, database.getDabaseName(),tabName).columnsArray;
+							List<Column> columnsCheck = new TableDAO(user, database.getDabaseName(),
+									tabName).columnsArray;
 							for (Column col : columnsCheck) {
 								for (Constraint constr : col.getConstraints()) {
 									if (constr.getType().equals("PK")
@@ -3452,14 +3714,13 @@ public class TableDAO<E> {
 				}
 			}
 		}
-		if(!autCheck) {
+		if (!autCheck) {
 			return false;
 		}
 		String filePath = pathString + "/" + column.getName();
 
 		try (FileChannel channel = FileChannel.open(Paths.get(pathString + "/Metadata"), StandardOpenOption.CREATE,
 				StandardOpenOption.APPEND)) {
-	
 
 			ByteBuffer buffer = ByteBuffer.allocate(1024);
 			writeMetaData(buffer, column.getName()); // Writing column name
@@ -3514,47 +3775,42 @@ public class TableDAO<E> {
 
 			if (column.getConstraints() != null && !column.getConstraints().isEmpty()) {
 
-			    for (Constraint constraint : column.getConstraints()) {
+				for (Constraint constraint : column.getConstraints()) {
 
-			    	for (int i = 1; i < rowCount; i++) {
-			            Map<String, E> datas1 = new HashMap<>(); // New map for each row
-		            	
-		            	
-			            if (constraint.getType().equals("PK") || constraint.getType().equals("NN")) {
-			                datas1.put(column.getName(), (E) ""); // Empty string for PK/NN
-			            }
-			            else if(constraint.getType().equals(("DEF")))
-			            {
-			                datas1.put(column.getName(), (E) constraint.getDefault());
-			            }
-			            
-			            else {
-			                datas1.put(column.getName(), (E) "NONE"); // Default value for other constraints
-			            }
+					for (int i = 1; i < rowCount; i++) {
+						Map<String, E> datas1 = new HashMap<>(); // New map for each row
 
-			            insertValue((HashMap<String, E>) datas1); // Insert the value
-			        }
-			    	
-			    }
+						if (constraint.getType().equals("PK") || constraint.getType().equals("NN")) {
+							datas1.put(column.getName(), (E) ""); // Empty string for PK/NN
+						} else if (constraint.getType().equals(("DEF"))) {
+							datas1.put(column.getName(), (E) constraint.getDefault());
+						}
+
+						else {
+							datas1.put(column.getName(), (E) "NONE"); // Default value for other constraints
+						}
+
+						insertValue((HashMap<String, E>) datas1); // Insert the value
+					}
+
+				}
 			} else {
-			    for (int i = 1; i <rowCount; i++) {
-			    	
-			    	System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-			        Map<String, E> datas1 = new HashMap<>(); // New map for each row
-			        datas1.put(column.getName(), (E) "NONE"); // Assign empty value per row
-			        insertValue((HashMap<String, E>) datas1);
-			    }
+				for (int i = 1; i < rowCount; i++) {
+
+					System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+					Map<String, E> datas1 = new HashMap<>(); // New map for each row
+					datas1.put(column.getName(), (E) "NONE"); // Assign empty value per row
+					insertValue((HashMap<String, E>) datas1);
+				}
 			}
 
 		}
-	
-	
+
 		columnsArray = readMetadata();
 		this.table.columns = columnsArray;
 		System.out.println(columnsArray);
 		return true;
 	}
-
 
 	private void shiftData(FileChannel channel, long position, long extraBytes) throws IOException {
 		long fileSize = channel.size();
@@ -3617,9 +3873,10 @@ public class TableDAO<E> {
 			}
 		}
 
-		if (oldDatatype != null && newDataType != null && ((rowCount == 0)
-				|| (oldDatatype.equals("INT") && newDataType.equals("FLOAT"))
-				|| ((oldDatatype.equals("INT") || oldDatatype.equals("FLOAT")) && newDataType.equals("STRING")))) {
+		if (oldDatatype != null && newDataType != null
+				&& ((rowCount == 0) || (oldDatatype.equals("INT") && newDataType.equals("FLOAT"))
+						|| ((oldDatatype.equals("INT") || oldDatatype.equals("FLOAT"))
+								&& (newDataType.equals("STRING") || newDataType.equals("BLOB"))))) {
 			try (FileChannel channel = FileChannel.open(
 					Paths.get(user.getHomeDirectory() + "/" + database.getDabaseName() + "/" + tableName + "/Metadata"),
 					StandardOpenOption.READ, StandardOpenOption.WRITE)) {
@@ -4284,7 +4541,7 @@ public class TableDAO<E> {
 
 	public boolean dropConstraint(String columnName, String constraintToRemove) {
 
-		Path metaPath = Paths.get(user.getHomeDirectory(), database.getDabaseName(), tableName, "Metadata");
+		Path metaPath = Path.of(user.getHomeDirectory(), database.getDabaseName(), tableName, "Metadata");
 		Path tempPath = metaPath.resolveSibling("Metadata.tmp"); // Temporary file
 
 		try (FileChannel readChannel = FileChannel.open(metaPath, StandardOpenOption.READ);
