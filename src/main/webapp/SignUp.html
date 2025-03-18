@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="SignUp.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto&display=swap">
+  </head>
+  <body>
+    <div class="box">
+      <form class="form">
+        <p class="title">Sign up</p>
+        <label>
+            <input class="input" type="text" name="username" required />
+            <span style="color: #187fbe">Username</span>
+          </label>
+
+        <label>
+          <input class="input" type="email" name="email" required />
+          <span style="color: #187fbe">Email</span>
+        </label>
+
+        <label>
+          <input class="input" type="password" name="password" required />
+          <span style="color: #187fbe">Password</span>
+        </label>
+        <label>
+          <input class="input" type="password" name="confirm_password" required />
+          <span style="color: #187fbe">Confirm password</span>
+        </label>
+        <button type="submit" class="submit">Submit</button>
+        <p class="signin" style="color: black">
+          Already have an account? <a href="Login.html">Login</a>
+        </p>
+      </form>
+    </div>
+    <script src="SignUp.js"></script>
+  </body>
+</html>

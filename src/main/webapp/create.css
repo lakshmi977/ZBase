@@ -1,0 +1,436 @@
+#operatorSpace {
+	--royal-gold: #d4af37;
+	--royal-purple: #4b0082;
+	--royal-blue: #000080;
+	--royal-red: #8b0000;
+	--light-gold: #f5e6c2;
+	--dark-gold: #b8860b;
+	--off-white: #f9f5ea;
+	--dark-text: #333333;
+}
+
+#operatorSpace * {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	/* font-family: "Georgia", serif; */
+}
+
+#operatorSpace body {
+	background-color: var(--off-white);
+	color: var(--dark-text);
+	/* padding: 20px; */
+	font-family: sans-serif;
+}
+
+#operatorSpace .container {
+	/* max-width: 1200px; */
+	margin: 0 auto;
+	background-color: white;
+	border: 1px solid var(--royal-gold);
+	border-radius: 5px;
+	box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+}
+
+#operatorSpace .header {
+	background: linear-gradient(to right, var(--royal-purple),
+		var(--royal-blue));
+	color: white;
+	padding: 20px;
+	text-align: center;
+	/* border-bottom: 4px solid var(--royal-gold); */
+}
+
+#operatorSpace .header h1 {
+	font-size: 28px;
+	margin-bottom: 5px;
+	text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#operatorSpace .header p {
+	font-style: italic;
+	font-size: 14px;
+}
+
+#operatorSpace .content {
+	padding: 30px;
+	padding-left: 55px;
+}
+
+#operatorSpace .form-group {
+	margin-bottom: 15px;
+}
+
+#operatorSpace .form-groupAlter {
+	margin-bottom: 15px;
+	color: var(--font-color)
+}
+
+#operatorSpace label {
+	display: block;
+	margin-bottom: 5px;
+	font-weight: bold;
+}
+
+#operatorSpace input[type="text"] {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	font-size: 16px;
+	background: rgba(255, 255, 255, 0.2);
+	border: 1px solid #4D4D4D;
+}
+
+#operatorSpace input[type="text"]:focus {
+	border-color: var(--royal-gold);
+	outline: none;
+	box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+}
+
+#operatorSpace .btn {
+	background-color: var(--royal-blue);
+	color: white;
+	border: none;
+	padding: 12px 20px;
+	margin: 10px 0;
+	cursor: pointer;
+	border-radius: 4px;
+	font-weight: bold;
+	transition: all 0.3s;
+	/* border-bottom: 3px solid var(--dark-gold); */
+}
+
+#operatorSpace .btn:hover {
+	background-color: var(--royal-purple);
+}
+
+#operatorSpace #addColumnBtn {
+	color: white;
+	background-color: gray;
+}
+
+#operatorSpace #addColumnBtn:hover {
+	color: white;
+	background-color: gray;
+}
+
+#operatorSpace .btn-gold {
+	color: var(--dark-text);
+	/* border-bottom: 3px solid var(--dark-gold); */
+	height: 60%;
+	width: 12%;
+}
+
+#operatorSpace #tableCreate {
+	margin-right: 20px;
+	color: white;
+	background-color: gray;
+}
+
+#operatorSpace #tableCreate:hover {
+	background-color: green;
+}
+
+#operatorSpace .btn-gold:hover {
+	background-color: var(--dark-gold);
+	color: white;
+}
+
+#operatorSpace .btn-red {
+	background-color: var(--royal-red);
+	border-bottom: 3px solid #5a0000;
+}
+
+#operatorSpace .btn-red:hover {
+	background-color: #a00000;
+}
+
+#operatorSpace .columns-container {
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	padding: 20px;
+	/* margin-top: 20px; */
+	background-color: var(--light-gold);
+	max-height: 600px;
+	overflow-y: auto;
+	/* text-align: ; */
+}
+
+#operatorSpace .column-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15px;
+	padding-bottom: 10px;
+	/* border-bottom: 2px solid var(--royal-gold); */
+}
+
+#operatorSpace .column-header h2 {
+	color: white;
+	font-size: 20px;
+}
+
+#operatorSpace .column-row {
+	/* background-color: white; */
+	border: 1px solid #9862b8;
+	border-radius: 5px;
+	padding: 25px;
+	margin-bottom: 15px;
+	position: relative;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+	width: 97%;
+}
+
+#operatorSpace .column-row input, select.option {
+	color: white;
+}
+
+#operatorSpace option {
+	background-color: #2a2b31;
+	/* Dark background */
+	color: #fff;
+	/* White text */
+}
+
+#operatorSpace select {
+	background-color: #2a2b31;
+	/* Dark background */
+	color: #fff;
+	/* White text */
+	border: 1px solid #4D94E6;
+	/* Themed border */
+	padding: 8px;
+	border-radius: 5px;
+}
+
+#operatorSpace select:disabled {
+	background-color: #444;
+	/* Slightly lighter gray */
+	color: #888;
+	/* Dim text to indicate disabled */
+}
+
+#operatorSpace .colDataType {
+	color: white;
+}
+
+#operatorSpace .column-row h3 {
+	margin-bottom: 15px;
+	color: var(--royal-blue);
+	display: flex;
+	justify-content: space-between;
+	/* border-bottom: 1px dashed var(--royal-gold); */
+	padding-bottom: 8px;
+	color: white;
+}
+
+#operatorSpace .column-row h4 {
+	color: white;
+}
+
+#operatorSpace .column-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 15px;
+}
+
+#operatorSpace .constraints-section {
+	margin-top: 15px;
+	padding-top: 15px;
+	border-top: 1px dashed #ccc;
+}
+
+#operatorSpace .constraints-title {
+	margin-bottom: 10px;
+	color: var(--royal-purple);
+	font-size: 16px;
+}
+
+#operatorSpace .constraints-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+}
+
+#operatorSpace .checkbox-group {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+#operatorSpace .checkbox-group input[type="checkbox"] {
+	width: 18px;
+	height: 18px;
+	cursor: pointer;
+}
+
+#operatorSpace .checkbox-group label {
+	margin-bottom: 0;
+	cursor: pointer;
+}
+
+#operatorSpace .foreign-key-section {
+	margin-top: 15px;
+	padding: 15px;
+	background-color: #282c34;
+	border-radius: 5px;
+	border: 1px solid #8f50bd;
+	display: none;
+}
+
+#operatorSpace .fk-group {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 15px;
+	margin-top: 10px;
+}
+
+#operatorSpace .fk-group select {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	background-color: white;
+}
+
+#operatorSpace .default-value-section {
+	margin-top: 15px;
+	padding: 15px;
+	background-color: #282c34;
+	border-radius: 5px;
+	border: 1px solid #9452c4;
+	display: none;
+}
+
+#operatorSpace .column-remove {
+	position: absolute;
+	right: 15px;
+	top: 15px;
+	background-color: transparent;
+	border: none;
+	color: var(--royal-red);
+	cursor: pointer;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+#operatorSpace .column-remove:hover {
+	color: white;
+}
+
+#operatorSpace .sql-preview {
+	margin-top: 30px;
+	background-color: #282c34;
+	color: #abb2bf;
+	padding: 20px;
+	border-radius: 5px;
+	font-family: "Courier New", monospace;
+	white-space: pre-wrap;
+	max-height: 300px;
+	overflow-y: auto;
+}
+
+#operatorSpace .sql-preview-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15px;
+}
+
+#operatorSpace .sql-keyword {
+	color: #c678dd;
+}
+
+#operatorSpace .sql-type {
+	color: #e6c07b;
+}
+
+#operatorSpace .sql-constraint {
+	color: #61afef;
+}
+
+#operatorSpace .footer {
+	background: linear-gradient(to right, var(--royal-blue),
+		var(--royal-purple));
+	color: white;
+	padding: 15px;
+	text-align: center;
+	border-top: 4px solid var(--royal-gold);
+	font-size: 14px;
+}
+
+#operatorSpace .form-group input {
+	margin-bottom: 15px;
+	width: 97%;
+	background-color: #4D4D4D;
+}
+
+#operatorSpace .form-group
+select {
+	margin-bottom: 15px;
+	width: 97%;
+	background-color: #4D4D4D;
+	color: white;
+}
+
+#operatorSpace .form-group {
+	margin-bottom: 15px;
+}
+
+#operatorSpace .form-groupAlter {
+	margin-bottom: 15px;
+	color: var(--font-color)
+}
+
+#operatorSpace select, input {
+	padding: 8px;
+	border-radius: 4px;
+	border: none;
+	background: rgba(255, 255, 255, 0.2);
+	color: #333;
+}
+
+#tableCreationHeading {
+	background: var(--card-bg);
+	padding: 2rem;
+	border-radius: 15px;
+	margin-bottom: 2rem;
+	margin-top: 1rem;
+	/* display: none; */
+	animation: slideIn 0.5s ease;
+	height: 60%;
+	width: 100%;
+	margin: auto;
+}
+
+/* Responsive design */
+@media ( max-width : 768px) {
+	#operatorSpace .column-grid, #operatorSpace .constraints-grid {
+		grid-template-columns: 1fr;
+	}
+	#operatorSpace .fk-group {
+		grid-template-columns: 1fr;
+	}
+}
+
+#operatorSpace #tableName {
+	height: 4rem;
+	width: 95%;
+	border-radius: 10px;
+}
+
+.input-group {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.input-group input {
+	width: 90%;
+}
+
+#operatorSpace #tableSection {
+	background-color: #2a2b31;
+}

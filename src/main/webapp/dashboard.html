@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Modern Database Manager</title>
+<link
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+	rel="stylesheet" />
+<link href="dashboard.css" rel="stylesheet" />
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+	<!-- Notofication box -->
+	<div id="notificationBox" class="notification"></div>
+
+	<div class="toolbar">
+		<div class="logo">
+			<img alt="" src="ZBASE.png" width="10%"> ZBase
+		</div>
+		<div class="toolbar-buttons">
+			<button class="btn" onclick="showCreateDatabaseUI()">
+				<i class="fas fa-plus"></i>New Database
+			</button>
+			<button class="btn" id="newTable" onclick="showCreateTableUI()">
+				<i class="fas fa-table"></i>New Table
+			</button>
+			<button id="logoutBtn" class="btn" onclick="logout()">
+				<i class="fa-solid fa-right-from-bracket"></i> Log out
+			</button>
+		</div>
+	</div>
+
+	<div class="main-container">
+		<div class="explorer">
+			<h2>
+				<i class="fas fa-server"></i>Databases
+			</h2>
+			<div id="dbExplorer"></div>
+		</div>
+
+		<div class="container" id="c">
+			<!--  This is where every contents gets loaded-->
+
+			<nav class="navbar" id="operation">
+				<ul>
+					<li><a id="operationInsert" href="#" class="active">Insert</a></li>
+					<li><a id="operationUpdate" href="#">Update</a></li>
+					<li><a id="operationSelect" href="#">Select</a></li>
+					<li><a id="operationAlter" href="#">Alter</a></li>
+					<li><a id="operationDelete" href="#">Delete</a></li>
+
+					<div class="tooltip-container" onclick="dropTable()">
+						<i class="fa-solid fa-trash-can"></i> <span class="tooltip-text">Drop
+							Table</span>
+					</div>
+
+
+
+				</ul>
+			</nav>
+
+			<div class="dbDeleteContainer">
+				<button class="deleteDB-btn" style="font-size: medium"
+					onclick="deleteDB()">Drop DB</button>
+			</div>
+			<div class="tableDeleteContainer"></div>
+
+			<div class="dynamic_operator_container" id="operatorSpace"></div>
+
+
+			<div id="popup" class="popup">
+				<p>Are you sure?</p>
+				<button id="yesBtn" onclick="yesBtn()">Yes</button>
+				<button id="noBtn" onclick="yesBtn()">No</button>
+			</div>
+
+			<!-- no db available -->
+			<!-- <div id="noDatabaseMessage" class="no-db-message">
+          <div class="no-db-container">
+            <div class="no-db-content">
+              <i class="fas fa-database"></i>
+              <p>No databases available</p>
+              <h5 style="margin-top: 5px">Create any database</h5>
+              <button class="plus-btn" onclick="showCreateDatabaseUI()">
+                +
+              </button>
+            </div>
+          </div>
+        </div> -->
+			<!-- /////////////////// -->
+
+			<!-- <div class="query-box">
+          <h2>⚡ Query Builder</h2>
+          <div class="query-options" id="query-options">
+            <select id="operation" onchange="colAction(this)">
+              <option value="INSERT">INSERT VALUES</option>
+              <option value="select">SELECT</option>
+              <option value="UPDATE">UPDATE</option>
+              <option value="ALTER">ALTER</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+            <select id="def-column">
+            </select>
+            <div id="addColumn" class="addButton" onclick="addSelect()">
+              <h3>+</h3>
+            </div>
+
+            <div
+              id="cancelColumn"
+              class="columnCancelButton"
+              onclick="cancelSelect(this)"
+            >
+              <h3>-</h3>
+            </div>
+
+            <div
+              id="cancelUpdateColumn"
+              class="columnCancelButton"
+              onclick="cancelUpdateSelect(this)"
+            >
+              <h3>-</h3>
+            </div>
+          </div>
+
+          <div id="condition_container" style="border: 1px solid blue">
+            <div id="where-container" style="border: 1px solid salmon">
+              <div class="whereTextBox">
+                <span>Where</span>
+              </div>
+
+              <select id="whereColumn"></select>
+
+              <select>
+                <option value="=" selected>=</option>
+                <option value=">">></option>
+                <option value=">=">>=</option>
+                <option value="<"><</option>
+                <option value="<="><=</option>
+              </select>
+              <input type="text" placeholder="Enter value" />
+
+              <div id="addCondition" class="addButton" onclick="addCondition()">
+                <h3>+</h3>
+              </div>
+            </div>
+          </div>
+          <button onclick="executeQuery()">Execute Query</button>
+        </div> -->
+
+			<div class="modal-overlay" id="modalOverlay">
+				<div class="modal">
+					<button class="close-btn" onclick="hideCreateDatabaseUI()">
+						<i class="fas fa-times"></i>
+					</button>
+					<div id="DBcreateTitleBox">
+						<h2>
+							<i class="fas fa-database"></i>Create Database...
+						</h2>
+					</div>
+					<div class="input-group">
+						<input type="text" id="dbName" placeholder=" " /> <label>Database
+							Name</label>
+					</div>
+					<button class="btn" id="createDb" onclick="createDatabase()">
+						<!-- <i class="fas fa-plus"></i>Create Database -->
+						Create
+					</button>
+					<div id="dbMessage" class="success-message"
+						style="display: block; border: 2px solid red"></div>
+				</div>
+			</div>
+
+			<!-- Entire create table box -->
+
+			<!-- <div class="section" id="tableSection">
+          <div id="tableCreationHeading">
+            <h2>
+              Create Table in <i class="fas fa-table"></i>
+              <span id="selectedDb"></span>
+            </h2>
+            <h2 id="cancelDBcreation" onclick="cancelTablecreation()">❌</h2>
+          </div>
+          <div class="input-group">
+            <input type="text" id="tableName" placeholder=" " />
+            <label>Table Name</label>
+          </div>
+
+          <div id="columnInputs" style="border: 1px solid green">
+            <div class="content" id="columnsArea">
+              <form id="tableForm">
+                <div class="form-group"></div>
+                <div class="column-header">
+                  <h2>Table Columns</h2>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="sql-preview-header">
+            <div id="sqlPreview" class="sql-preview"></div>
+          </div>
+
+          <div style="text-align: right; margin-top: 30px">
+            <button type="button" id="addColumnBtn" class="btn btn-gold">
+              Add Column
+            </button>
+            <button type="button" class="btn btn-gold" onclick="createTable()">
+              Create Table
+            </button>
+          </div>
+
+          <div class="tableDisplay">DB</div>
+          <div id="tableMessage" class="success-message"></div>
+        </div> -->
+
+			<!-- Entire table data display -->
+			<div class="tableDisplay"></div>
+		</div>
+
+		<!-- Add new query interface section -->
+	</div>
+
+	<div class="notification" id="notification">
+		<i class="fas fa-check-circle"></i> <span id="notificationMessage"></span>
+	</div>
+
+
+	<script src="dashboard.js"></script>
+</body>
+</html>

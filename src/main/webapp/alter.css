@@ -1,0 +1,294 @@
+#alterContainer {
+    --royal-purple: #0c59e7;
+    --royal-gold: rgba(255, 255, 255, 0.1);
+    --royal-grey: #2a2b31;
+    --royal-cream: grey;
+    --royal-burgundy: #800020;
+    --font-color: #F5F5F5;
+}
+
+#alterContainer body {
+    font-family: 'Times New Roman', Times, serif;
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    color: var(--royal-navy);
+}
+
+#alterContainer .alterContainer {
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+#alterContainer .header {
+    text-align: center;
+    padding: 20px 0;
+    margin-bottom: 30px;
+    border-bottom: 3px double var(--royal-gold);
+}
+
+#alterContainer .header h1 {
+    margin: 0;
+    color: var(--royal-purple);
+    font-size: 32px;
+    letter-spacing: 1px;
+}
+
+#alterContainer .header p {
+    margin: 5px 0 0;
+    font-style: italic;
+}
+
+#alterContainer .card {
+    background-color: #2a2b31;
+    border: 1px solid var(--royal-gold);
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+#alterContainer .card-header {
+    color: white;
+    padding: 15px 20px;
+    border-bottom: 2px solid var(--royal-gold);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#alterContainer .card-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+#alterContainer .card-body {
+    padding: 20px;
+}
+
+#alterContainer .form-group {
+    margin-bottom: 15px;
+    color: var(--font-color)
+}
+
+#alterContainer label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#alterContainer .constraint-fields label {
+    color: var(--font-color);
+}
+
+#alterContainer #newColumnName {
+    width: 97%;
+    height: 3rem;
+}
+
+#alterContainer select,
+#alterContainer input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: 'Times New Roman', Times, serif;
+}
+
+#alterContainer .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--royal-purple);
+    color: white;
+    border: 1px solid var(--royal-gold);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Times New Roman', Times, serif;
+    transition: all 0.3s;
+}
+
+#alterContainer .btn:hover {
+    background-color: var(--royal-navy);
+}
+
+#alterContainer .btn-cancel {
+    background-color: #f8f9fa;
+    color: var(--royal-navy);
+    margin-right: 10px;
+}
+
+#alterContainer .btn-cancel:hover {
+    background-color: #e2e6ea;
+}
+
+#alterContainer .actions {
+    text-align: right;
+    margin-top: 20px;
+}
+
+#alterContainer #tabs {
+    display: flex;
+    border-bottom: 1px solid var(--royal-gold);
+    margin-bottom: 20px;
+}
+
+#alterContainer .tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background-color: #5a6168;
+    margin-right: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+#alterContainer .tab.active {
+    border-color: var(--royal-grey);
+    background-color: var(--royal-cream);
+    color: var(--font-color);
+    position: relative;
+    bottom: -1px;
+}
+
+#alterContainer .tab-content {
+    display: none;
+}
+
+#alterContainer .tab-content.active {
+    display: block;
+}
+
+#alterContainer .table-selection {
+    margin-bottom: 30px;
+    background-color: var(--royal-navy);
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    border: 2px solid var(--royal-gold);
+}
+
+#alterContainer .royal-divider {
+    height: 5px;
+    background: linear-gradient(to right, transparent, var(--royal-gold), transparent);
+    margin: 30px 0;
+}
+
+/* Royal decorations */
+#alterContainer .crown-icon {
+    font-size: 24px;
+    color: var(--royal-gold);
+    margin-right: 10px;
+}
+
+#alterContainer .royal-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--royal-gold);
+}
+
+#alterContainer .table-preview {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#alterContainer .table-preview th {
+    background-color: var(--royal-navy);
+    color: white;
+    text-align: left;
+    padding: 10px;
+}
+
+#alterContainer .table-preview td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#alterContainer .table-preview tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+#alterContainer .notification {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border-left: 5px solid var(--royal-purple);
+    background-color: #f8f9fa;
+}
+
+/* Constraint-specific styling */
+#alterContainer .constraint-section {
+    color: var(--font-color);
+    border: 1px solid #5e5e5e;
+    border-radius: 4px;
+    padding: 15px;
+    margin-top: 20px;
+    background-color: var(--royal-grey);
+}
+
+#alterContainer .constraint-section h3 {
+    margin-top: 0;
+    color: var(--royal-navy);
+    border-bottom: 1px solid var(--royal-gold);
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+#alterContainer .constraint-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#alterContainer .constraint-option input[type="checkbox"] {
+    margin-right: 10px;
+    width: auto;
+}
+
+#alterContainer .constraint-option lable {
+    color: white;
+}
+
+#alterContainer .constraint-fields {
+    margin-left: 25px;
+    padding: 10px;
+    border-left: 3px solid var(--royal-gold);
+    margin-bottom: 15px;
+    background-color: #2a2b31;
+}
+
+#alterContainer .constraint-fields.hidden {
+    display: none;
+}
+
+/* Constraint-specific styling */
+#alterContainer .constraint-type {
+    background-color: var(--royal-grey);
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: white;
+}
+
+#alterContainer .constraint-option input[type="radio"] {
+    justify-content: center;
+    margin-right: 10px;
+    width: 50px;
+}
+
+#alterContainer .constraint-option label {
+    color: var(--font-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#alterContainer .form-group input {
+    margin-bottom: 15px;
+    width: 97%;
+}
